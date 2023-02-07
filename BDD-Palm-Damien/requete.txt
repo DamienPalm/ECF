@@ -1,0 +1,112 @@
+1°)
+
+SELECT nomEtudiant, prenomEtudiant, dateNaissanceEtudiant
+FROM etudiants
+WHERE dateNaissanceEtudiant < (
+	SELECT dateNaissanceEtudiant
+    	FROM etudiants
+    	WHERE nomEtudiant = 'Leclercq'
+    	AND prenomEtudiant = 'Jules');
+
+
+2°)
+
+SELECT CONCAT(e.nomEtudiant, ' ', e.prenomEtudiant)'nom', an.note
+FROM etudiants e
+INNER JOIN	avoir_note an ON e.idEtudiant = an.idEtudiant
+WHERE an.idEpreuve=4
+AND an.note >10;
+
+
+3°)
+
+SELECT e.nomEtudiant, e.prenomEtudiant, an.note
+FROM etudiants e
+INNER JOIN	avoir_note an ON e.idEtudiant = an.idEtudiant
+WHERE an.note >= 12;
+
+
+4°)
+
+SELECT e.nomEtudiant, e.prenomEtudiant, an.note
+FROM etudiants e
+INNER JOIN	avoir_note an ON e.idEtudiant = an.idEtudiant
+WHERE an.idEpreuve = '4'
+AND an.note > (
+   	 SELECT an.note
+    	FROM etudiants e
+	INNER JOIN avoir_note an ON e.idEtudiant = an.idEtudiant
+   	WHERE e.nomEtudiant = 'Dupont'
+    	AND e.prenomEtudiant = 'Luc'
+	AND an.idEpreuve = '4');
+
+
+5°)
+
+SELECT e.nomEtudiant, e.prenomEtudiant, an.note
+FROM etudiants e
+INNER JOIN	avoir_note an ON e.idEtudiant = an.idEtudiant
+WHERE an.note = (
+	SELECT an.note
+	FROM etudiants e
+	INNER JOIN avoir_note an ON e.idEtudiant = an.idEtudiant
+	WHERE e.nomEtudiant = 'Dupont'
+	AND e.prenomEtudiant = 'Luc');
+
+
+6°)
+
+ALTER TABLE etudiants
+ADD HOBBY varchar(20)
+DEFAULT 'Sport';
+
+
+7°)
+
+Pour ajouter la colonne : 
+ALTER TABLE etudiants
+ADD NEWCOL integer;
+
+Pour supprimer la colonne:
+ALTER TABLE etudiants
+DROP NEWCOL;
+
+
+8°)
+
+Enlever 3 points à toutes ses notes :
+
+UPDATE avoir_note
+SET note = note - 3
+WHERE idEtudiant = (
+	SELECT idEtudiant
+	FROM etudiants
+	WHERE nomEtudiant = 'Marke');
+
+
+Une tentative qui ne fonctionne pas :
+
+UPDATE avoir_note
+SET note = note - 3(
+	SELECT an.idAvoirNote, e.idEtudiant, an.idEpreuve, an.note
+	FROM avoir_note	an
+	INNER JOIN etudiants e ON e.idEtudiant = an.idEtudiant
+	INNER JOIN epreuves ep ON ep.idEpreuve = an.idEpreuve
+	INNER JOIN matieres m ON m.idMatiere = ep.idMatiereEpreuve
+	WHERE e.nomEtudiant = 'Marke'
+	AND m.nomMatiere = 'BD');
+    
+
+9°)
+
+ne fonctionne pas :
+
+INSERT INTO avoir_note
+VALUES (idAvoirNote, idEtudiant, idEpreuve, (
+    SELECT AVG(note)*0.9
+	FROM avoir_note an
+	INNER JOIN etudiants e ON e.idEtudiant = an.idEtudiant
+	WHERE e.nomEtudiant = 'Duwa'
+	AND an.idEpreuve = 4
+	GROUP BY note));
+
